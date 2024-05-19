@@ -1,6 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\Admin\StatsController;
+use Faker\Guesser\Name;
+use GuzzleHttp\Middleware;
+use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,27 +23,36 @@ use Illuminate\Support\Facades\Route;
 
 // Task 1: point the main "/" URL to the HomeController method "index"
 // Put one code line here below
+Route::get('/', [HomeController::class,'index']);
 
 
 // Task 2: point the GET URL "/user/[name]" to the UserController method "show"
 // It doesn't use Route Model Binding, it expects $name as a parameter
 // Put one code line here below
+Route::get('/user/{name}',[UserController::class,'show']);
 
 
 // Task 3: point the GET URL "/about" to the view
 // resources/views/pages/about.blade.php - without any controller
 // Also, assign the route name "about"
-// Put one code line here below
-
+// // Put one code line here below
+Route::view('/about', 'pages.about')->name('about');
 
 // Task 4: redirect the GET URL "log-in" to a URL "login"
 // Put one code line here below
+Route::redirect('log-in', 'login');
+
 
 
 // Task 5: group the following route sentences below in Route::group()
 // Assign middleware "auth"
 // Put one Route Group code line here below
-
+Route::middleware('auth')->group(function(){
+    Route::prefix('/app')->group(function(){
+        Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
+        Route::resource('/tasks',[TaskController::class]);
+    });
+});
     // Tasks inside that Authenticated group:
 
     // Task 6: /app group within a group
@@ -53,7 +70,7 @@ use Illuminate\Support\Facades\Route;
         // Task 8: Manage tasks with URL /app/tasks/***.
         // Add ONE line to assign 7 resource routes to TaskController
         // Put one code line here below
-
+        
     // End of the /app Route Group
 
 
@@ -61,7 +78,11 @@ use Illuminate\Support\Facades\Route;
     // Add a group for routes with URL prefix "admin"
     // Assign middleware called "is_admin" to them
     // Put one Route Group code line here below
-
+    Route::group(['middleware'=>'is_admin','prefix'=>'admin'],function(){
+        Route::get('Dashboard', [DashboardController::class]);
+        Route::get('stats', [StatsController::class]);
+        
+    });
 
         // Tasks inside that /admin group:
 
